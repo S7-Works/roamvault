@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:photo_manager/photo_manager.dart';
-import 'package:path_provider/path_provider.dart';
 import '../models/backup_state.dart';
 
 /// Uploads photos/screenshots from the device camera roll to the RoamVault

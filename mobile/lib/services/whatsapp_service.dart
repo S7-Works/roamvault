@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../models/backup_state.dart';
 
@@ -21,7 +20,6 @@ class WhatsappService {
   Future<void> handleSharedFiles(List<SharedMediaFile> files) async {
     for (final f in files) {
       final path = f.path;
-      if (path == null) continue;
       if (!path.toLowerCase().endsWith('.zip')) continue;
       await _uploadZip(File(path));
     }

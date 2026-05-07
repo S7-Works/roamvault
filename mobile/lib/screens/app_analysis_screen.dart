@@ -21,37 +21,37 @@ class _AppStorageInfo {
 const _placeholderApps = [
   _AppStorageInfo(
     name: 'WhatsApp',
-    bytes: 1_420_000_000,
+    bytes: 1420000000,
     icon: Icons.chat_bubble_outline,
   ),
   _AppStorageInfo(
     name: 'Google Photos',
-    bytes: 980_000_000,
+    bytes: 980000000,
     icon: Icons.photo_library_outlined,
   ),
   _AppStorageInfo(
     name: 'Spotify',
-    bytes: 540_000_000,
+    bytes: 540000000,
     icon: Icons.music_note_outlined,
   ),
   _AppStorageInfo(
     name: 'Maps (offline)',
-    bytes: 430_000_000,
+    bytes: 430000000,
     icon: Icons.map_outlined,
   ),
   _AppStorageInfo(
     name: 'Camera Roll cache',
-    bytes: 310_000_000,
+    bytes: 310000000,
     icon: Icons.camera_alt_outlined,
   ),
   _AppStorageInfo(
     name: 'Instagram',
-    bytes: 210_000_000,
+    bytes: 210000000,
     icon: Icons.photo_camera_outlined,
   ),
   _AppStorageInfo(
     name: 'Other',
-    bytes: 800_000_000,
+    bytes: 800000000,
     icon: Icons.folder_outlined,
   ),
 ];
@@ -109,7 +109,7 @@ class AppAnalysisScreen extends StatelessWidget {
                   '(placeholder data)',
                   style: TextStyle(
                     fontSize: 11,
-                    color: cs.onPrimaryContainer.withOpacity(0.6),
+                    color: cs.onPrimaryContainer.withValues(alpha: 0.6),
                   ),
                 ),
               ],

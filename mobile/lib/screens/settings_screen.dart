@@ -78,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // ── Backend ────────────────────────────────────────────────────
-          _SectionHeader('Backend'),
+          const _SectionHeader('Backend'),
           _SettingsTextField(
             label: 'Backend URL',
             hint: 'http://your-server:8080',
@@ -89,7 +89,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // ── Backblaze B2 ───────────────────────────────────────────────
-          _SectionHeader('Backblaze B2'),
+          const _SectionHeader('Backblaze B2'),
           _SettingsTextField(
             label: 'Key ID',
             hint: 'xxxxxxxxxxxxxxxxxxxxxxx',
@@ -112,7 +112,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // ── Backup schedule ────────────────────────────────────────────
-          _SectionHeader('Backup Schedule'),
+          const _SectionHeader('Backup Schedule'),
           Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -120,7 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: DropdownButtonFormField<int>(
-                value: settings.backupScheduleHours,
+                initialValue: settings.backupScheduleHours,
                 decoration: const InputDecoration(
                   labelText: 'Auto-backup every',
                   border: InputBorder.none,
@@ -143,7 +143,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 24),
 
           // ── Expiry ─────────────────────────────────────────────────────
-          _SectionHeader('Media Expiry'),
+          const _SectionHeader('Media Expiry'),
           Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: DropdownButtonFormField<int>(
-                value: settings.expiryDays,
+                initialValue: settings.expiryDays,
                 decoration: const InputDecoration(
                   labelText: 'Delete from cloud after',
                   border: InputBorder.none,

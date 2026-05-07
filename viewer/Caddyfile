@@ -1,0 +1,17 @@
+:{$PORT:3000}
+
+# Proxy /api/* and /view/* to the backend service
+handle /api/* {
+	reverse_proxy {$BACKEND_URL}
+}
+
+handle /view/* {
+	reverse_proxy {$BACKEND_URL}
+}
+
+# Serve the SolidJS SPA from dist/
+handle {
+	root * dist
+	try_files {path} /index.html
+	file_server
+}

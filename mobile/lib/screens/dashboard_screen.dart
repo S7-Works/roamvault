@@ -25,7 +25,6 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<BackupState>();
-    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
