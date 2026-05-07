@@ -18,6 +18,9 @@ Phone upgrades should be exciting, not stressful. RoamVault solves the real bloc
 │                  Flutter Mobile App                  │
 │         iOS + Android — the primary interface        │
 │  Camera roll · Screenshots · WhatsApp · App cleanup  │
+├─────────────────────────────────────────────────────┤
+│           Native iOS Extensions (Swift)              │
+│  FileProvider · Photos Library · Background sync    │
 └────────────────────┬────────────────────────────────┘
                      │
                      ▼
@@ -49,6 +52,7 @@ Phone upgrades should be exciting, not stressful. RoamVault solves the real bloc
 | Layer | Choice |
 |---|---|
 | Mobile app | Flutter (iOS + Android) |
+| iOS native extensions | Swift (FileProvider, Photos Library) |
 | Backend | Rust + Axum |
 | ORM | SeaORM + PostgreSQL |
 | Serialization | serde_json (initial hydration) → FlatBuffers (data transport) |
@@ -57,6 +61,57 @@ Phone upgrades should be exciting, not stressful. RoamVault solves the real bloc
 | Compression | Brotli (chat text + JSON chunks) |
 | Dedup | Global SHA-256, per-user reference counting |
 | Deployment | Railway |
+
+---
+
+## iOS Native Extensions (Swift)
+
+RoamVault ships as a Flutter app with native Swift app extensions to unlock deep iOS integration unavailable to Flutter alone.
+
+### FileProvider Extension
+Registers RoamVault as an **official storage provider** in the iOS Files app alongside iCloud Drive, Dropbox, and Google Drive.
+
+```
+Settings > [Your Name] > iCloud           (Apple)
+Files app > Browse > Locations            (third-party)
+  └── RoamVault  ← appears here automatically
+```
+
+**What this enables:**
+- Users browse and restore backed-up files directly from Files app
+- Any app that supports "Open from..." can access RoamVault storage
+- iOS can offload content directly to RoamVault as a storage destination
+- Works with iOS Shortcuts for automated backup workflows
+
+**Implementation:**
+```
+RoamVaultApp.xcodeproj
+├── RoamVaultFileProvider/          # FileProvider extension target
+│   ├── FileProviderExtension.swift # NSFileProviderExtension subclass
+│   ├── FileProviderItem.swift      # NSFileProviderItem — maps B2 objects
+│   └── FileProviderEnumerator.swift # Lists files/folders from B2
+└── RoamVaultApp/                   # Main Flutter host app
+```
+
+The FileProvider extension communicates with B2 via the same Rust backend API — it fetches directory listings and downloads files on demand (no full sync required).
+
+### Photos Library Extension
+Registers RoamVault as a storage location in the **Photos app**:
+- Users can select RoamVault as an album export destination
+- Enables direct camera offload workflow inside Photos
+- Appears under Photos > Albums > Shared Albums (as a provider)
+
+### Background Sync (BGTaskScheduler)
+Swift background task runs even when Flutter app is closed:
+- `BGProcessingTask` — full backup sync when on WiFi + charging
+- `BGAppRefreshTask` — lightweight check for new photos every few hours
+- Hands off actual upload work to the Rust backend via HTTP
+
+### App Store Requirements
+- FileProvider extension requires App Store distribution (no TestFlight-only)
+- Apple review specifically checks: user data privacy, encryption in transit, deletion capability
+- All B2 transfers must use HTTPS (already satisfied)
+- User must be able to delete all their data from within the app (build this explicitly)
 
 ---
 
@@ -69,6 +124,9 @@ Phone upgrades should be exciting, not stressful. RoamVault solves the real bloc
 | WhatsApp backup | User exports `.zip` manually → app picks it up |
 | iMessage attachments | Deep link to Settings (sandboxed, no direct access) |
 | App storage analysis | `device_info_plus` + Settings deep link |
+| Files app integration | Native FileProvider extension (Swift) |
+| Photos app integration | Native Photos Library extension (Swift) |
+| Background sync | Native BGTaskScheduler (Swift) |
 
 ### Android Capabilities
 | Feature | Approach |
@@ -271,8 +329,14 @@ Environment variables managed via Railway — B2 key ID, app key, bucket name, D
 - iOS: storage overview, deep links to reclaim space
 - Pre-upgrade checklist: "safe to wipe" confirmation flow
 
-### Phase 4 — Polish
+### Phase 4 — iOS Deep Integration (Swift Extensions)
+- FileProvider extension: RoamVault appears in Files app as storage provider
+- Photos Library extension: direct camera offload from Photos app
+- BGTaskScheduler: background sync on WiFi + charging
+- App Store submission with FileProvider entitlements
+
+### Phase 5 — Polish
 - Password-protected chat links
 - Multiple chats per account
-- Backup scheduling (background sync)
-- Restore flow for new phone setup
+- Restore flow for new phone setup — "start fresh" checklist before upgrade
+- Pre-upgrade readiness score: "X GB backed up, safe to wipe"
