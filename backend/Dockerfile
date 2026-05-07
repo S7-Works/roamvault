@@ -1,4 +1,4 @@
-FROM rust:1.81 AS builder
+FROM rust:1.88 AS builder
 WORKDIR /app
 COPY Cargo.toml Cargo.lock* ./
 RUN mkdir src && echo "fn main(){}" > src/main.rs && cargo build --release && rm src/main.rs

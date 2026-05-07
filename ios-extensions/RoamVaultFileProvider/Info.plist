@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- ── Identity ── -->
+    <key>CFBundleDisplayName</key>
+    <string>RoamVault Files</string>
+
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+
+    <key>CFBundleIdentifier</key>
+    <!-- Must be a sub-bundle of the main app, e.g. app.roamvault.fileprovider -->
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+
+    <key>CFBundlePackageType</key>
+    <string>XPC!</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <!-- ── Deployment ── -->
+    <key>NSExtension</key>
+    <dict>
+        <key>NSExtensionFileProviderDocumentGroup</key>
+        <!-- Must match the app group entitlement in the main app and all extensions -->
+        <string>group.app.roamvault</string>
+
+        <key>NSExtensionFileProviderSupportsEnumeration</key>
+        <true/>
+
+        <!-- Set to true when you also support NSFileProviderReplicatedExtension (iOS 16+) -->
+        <key>NSExtensionFileProviderSupportsPickingFolders</key>
+        <false/>
+
+        <key>NSExtensionPointIdentifier</key>
+        <string>com.apple.fileprovider-nonui</string>
+
+        <key>NSExtensionPrincipalClass</key>
+        <string>$(PRODUCT_MODULE_NAME).FileProviderExtension</string>
+    </dict>
+
+    <!-- ── Minimum OS ── -->
+    <key>MinimumOSVersion</key>
+    <string>14.0</string>
+
+    <!-- ── Privacy usage descriptions ── -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>RoamVault uses your photo library to back up and sync your photos to cloud storage.</string>
+
+</dict>
+</plist>

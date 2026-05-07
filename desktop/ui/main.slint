@@ -1,0 +1,366 @@
+import { Button, ListView, LineEdit, ComboBox, StandardListView, ScrollView, GroupBox } from "std-widgets.slint";
+
+struct WatchFolder {
+    path: string,
+    threshold-days: int,
+}
+
+struct ArchivedFile {
+    original-path: string,
+    b2-key: string,
+    size-mb: float,
+    archived-at: string,
+    tier: string,
+}
+
+export component AppWindow inherits Window {
+    title: "RoamVault";
+    preferred-width: 900px;
+    preferred-height: 620px;
+
+    // State
+    in-out property <int> active-tab: 0;
+    in-out property <string> total-archived-gb: "0.00";
+    in-out property <string> last-sync-time: "Never";
+    in-out property <string> space-freed-gb: "0.00";
+    in-out property <[WatchFolder]> watch-folders: [];
+    in-out property <[ArchivedFile]> archived-files: [];
+    in-out property <string> b2-key-id: "";
+    in-out property <string> b2-app-key: "";
+    in-out property <string> b2-bucket: "";
+    in-out property <int> default-threshold: 60;
+
+    // Callbacks
+    callback add-watch-folder(string, int);
+    callback remove-watch-folder(int);
+    callback restore-file(int);
+    callback save-settings(string, string, string, int);
+    callback run-scan-now();
+
+    VerticalLayout {
+        padding: 0px;
+
+        // Tab bar
+        Rectangle {
+            height: 44px;
+            background: #1e1e2e;
+
+            HorizontalLayout {
+                padding-left: 12px;
+                spacing: 4px;
+
+                for tab-name[i] in ["Overview", "Watch Folders", "File Browser", "Settings"]: Rectangle {
+                    width: 130px;
+                    height: 44px;
+                    background: active-tab == i ? #313244 : transparent;
+                    border-radius: 0px;
+
+                    TouchArea {
+                        clicked => { active-tab = i; }
+                    }
+
+                    Text {
+                        text: tab-name;
+                        color: active-tab == i ? #cdd6f4 : #6c7086;
+                        font-size: 13px;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+
+        // Tab content
+        Rectangle {
+            background: #181825;
+            clip: true;
+
+            // Overview tab
+            if active-tab == 0: VerticalLayout {
+                padding: 32px;
+                spacing: 24px;
+
+                Text {
+                    text: "Overview";
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #cdd6f4;
+                }
+
+                HorizontalLayout {
+                    spacing: 20px;
+
+                    Rectangle {
+                        background: #313244;
+                        border-radius: 12px;
+                        padding: 24px;
+                        VerticalLayout {
+                            spacing: 8px;
+                            Text { text: "Total Archived"; color: #6c7086; font-size: 12px; }
+                            Text { text: total-archived-gb + " GB"; color: #89b4fa; font-size: 28px; font-weight: 700; }
+                        }
+                    }
+
+                    Rectangle {
+                        background: #313244;
+                        border-radius: 12px;
+                        padding: 24px;
+                        VerticalLayout {
+                            spacing: 8px;
+                            Text { text: "Space Freed"; color: #6c7086; font-size: 12px; }
+                            Text { text: space-freed-gb + " GB"; color: #a6e3a1; font-size: 28px; font-weight: 700; }
+                        }
+                    }
+
+                    Rectangle {
+                        background: #313244;
+                        border-radius: 12px;
+                        padding: 24px;
+                        VerticalLayout {
+                            spacing: 8px;
+                            Text { text: "Last Sync"; color: #6c7086; font-size: 12px; }
+                            Text { text: last-sync-time; color: #fab387; font-size: 16px; font-weight: 600; }
+                        }
+                    }
+                }
+
+                Button {
+                    text: "Scan Now";
+                    clicked => { run-scan-now(); }
+                }
+            }
+
+            // Watch Folders tab
+            if active-tab == 1: VerticalLayout {
+                padding: 32px;
+                spacing: 16px;
+
+                Text {
+                    text: "Watch Folders";
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #cdd6f4;
+                }
+
+                // Add folder row
+                HorizontalLayout {
+                    spacing: 8px;
+                    height: 36px;
+
+                    new-path := LineEdit {
+                        placeholder-text: "/path/to/folder";
+                        preferred-width: 380px;
+                    }
+
+                    threshold-combo := ComboBox {
+                        model: ["30 days", "60 days", "90 days"];
+                        current-index: 1;
+                        width: 100px;
+                    }
+
+                    Button {
+                        text: "Add";
+                        clicked => {
+                            add-watch-folder(new-path.text, (threshold-combo.current-index + 1) * 30);
+                            new-path.text = "";
+                        }
+                    }
+                }
+
+                // Folder list
+                ListView {
+                    for folder[i] in watch-folders: Rectangle {
+                        height: 48px;
+                        background: mod(i, 2) == 0 ? #1e1e2e : #181825;
+                        border-radius: 6px;
+
+                        HorizontalLayout {
+                            padding: 12px;
+                            spacing: 8px;
+                            alignment: space-between;
+
+                            Text {
+                                text: folder.path;
+                                color: #cdd6f4;
+                                vertical-alignment: center;
+                            }
+
+                            Text {
+                                text: folder.threshold-days + "d";
+                                color: #89b4fa;
+                                vertical-alignment: center;
+                                width: 40px;
+                            }
+
+                            Button {
+                                text: "Remove";
+                                clicked => { remove-watch-folder(i); }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // File Browser tab
+            if active-tab == 2: VerticalLayout {
+                padding: 32px;
+                spacing: 16px;
+
+                Text {
+                    text: "Archived Files";
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #cdd6f4;
+                }
+
+                // Header
+                Rectangle {
+                    height: 32px;
+                    background: #313244;
+                    border-radius: 6px;
+                    HorizontalLayout {
+                        padding: 8px;
+                        spacing: 8px;
+                        Text { text: "Path"; color: #6c7086; font-size: 11px; font-weight: 700; preferred-width: 300px; }
+                        Text { text: "Size"; color: #6c7086; font-size: 11px; font-weight: 700; width: 70px; }
+                        Text { text: "Tier"; color: #6c7086; font-size: 11px; font-weight: 700; width: 80px; }
+                        Text { text: "Archived At"; color: #6c7086; font-size: 11px; font-weight: 700; preferred-width: 160px; }
+                    }
+                }
+
+                ListView {
+                    for file[i] in archived-files: Rectangle {
+                        height: 44px;
+                        background: mod(i, 2) == 0 ? #1e1e2e : #181825;
+                        border-radius: 4px;
+
+                        HorizontalLayout {
+                            padding: 8px;
+                            spacing: 8px;
+                            alignment: space-between;
+
+                            Text {
+                                text: file.original-path;
+                                color: #cdd6f4;
+                                font-size: 12px;
+                                vertical-alignment: center;
+                                preferred-width: 300px;
+                                overflow: elide;
+                            }
+
+                            Text {
+                                text: file.size-mb + " MB";
+                                color: #a6e3a1;
+                                font-size: 12px;
+                                vertical-alignment: center;
+                                width: 70px;
+                            }
+
+                            Text {
+                                text: file.tier;
+                                color: file.tier == "deep_archive" ? #f38ba8 : #89b4fa;
+                                font-size: 12px;
+                                vertical-alignment: center;
+                                width: 80px;
+                            }
+
+                            Text {
+                                text: file.archived-at;
+                                color: #6c7086;
+                                font-size: 11px;
+                                vertical-alignment: center;
+                                preferred-width: 160px;
+                            }
+
+                            Button {
+                                text: "Restore";
+                                clicked => { restore-file(i); }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Settings tab
+            if active-tab == 3: VerticalLayout {
+                padding: 32px;
+                spacing: 20px;
+
+                Text {
+                    text: "Settings";
+                    font-size: 22px;
+                    font-weight: 700;
+                    color: #cdd6f4;
+                }
+
+                Rectangle {
+                    background: #313244;
+                    border-radius: 12px;
+                    padding: 24px;
+
+                    VerticalLayout {
+                        spacing: 14px;
+
+                        Text { text: "Backblaze B2 Credentials"; color: #89b4fa; font-size: 14px; font-weight: 700; }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            height: 36px;
+                            Text { text: "Key ID"; color: #cdd6f4; vertical-alignment: center; width: 100px; }
+                            key-id-input := LineEdit {
+                                text: b2-key-id;
+                                placeholder-text: "keyID...";
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            height: 36px;
+                            Text { text: "App Key"; color: #cdd6f4; vertical-alignment: center; width: 100px; }
+                            app-key-input := LineEdit {
+                                text: b2-app-key;
+                                placeholder-text: "appKey...";
+                                input-type: password;
+                            }
+                        }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            height: 36px;
+                            Text { text: "Bucket"; color: #cdd6f4; vertical-alignment: center; width: 100px; }
+                            bucket-input := LineEdit {
+                                text: b2-bucket;
+                                placeholder-text: "my-bucket";
+                            }
+                        }
+
+                        Text { text: "Archive Thresholds"; color: #89b4fa; font-size: 14px; font-weight: 700; }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            height: 36px;
+                            Text { text: "Default"; color: #cdd6f4; vertical-alignment: center; width: 100px; }
+                            threshold-input := ComboBox {
+                                model: ["30 days", "60 days", "90 days"];
+                                current-index: default-threshold == 30 ? 0 : default-threshold == 90 ? 2 : 1;
+                                width: 120px;
+                            }
+                        }
+
+                        Button {
+                            text: "Save Settings";
+                            clicked => {
+                                save-settings(
+                                    key-id-input.text,
+                                    app-key-input.text,
+                                    bucket-input.text,
+                                    (threshold-input.current-index + 1) * 30
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,6 @@
 import { createSignal, onMount, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
+import { useParams } from "@solidjs/router";
 import "./App.css";
 
 interface InitData {
@@ -22,14 +23,15 @@ interface MessageChunk {
   total_chunks: number;
 }
 
-const INIT: InitData = (window as any).__INIT__ ?? {
-  chatId: "demo",
-  chatName: "Demo Chat",
-  platform: "ios",
-  messageCount: 0,
-};
-
 export default function App() {
+  const params = useParams<{ id: string }>();
+
+  const INIT: InitData = (window as any).__INIT__ ?? {
+    chatId: params.id ?? "demo",
+    chatName: "Chat",
+    platform: "whatsapp",
+    messageCount: 0,
+  };
   const [messages, setMessages] = createSignal<MessageView[]>([]);
   const [chunk, setChunk] = createSignal(0);
   const [totalChunks, setTotalChunks] = createSignal(1);

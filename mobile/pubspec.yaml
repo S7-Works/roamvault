@@ -1,0 +1,45 @@
+name: roamvault
+description: RoamVault — travel media backup and storage manager.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Media access
+  photo_manager: ^3.0.0
+
+  # File system paths
+  path_provider: ^2.0.0
+
+  # HTTP client
+  http: ^1.0.0
+
+  # Share media out of app
+  share_plus: ^7.0.0
+
+  # Receive shared files (WhatsApp zip, etc.)
+  receive_sharing_intent: ^1.8.0
+
+  # Runtime permission requests
+  permission_handler: ^11.0.0
+
+  # WebView for /view/:id
+  webview_flutter: ^4.4.0
+
+  # State management
+  provider: ^6.1.0
+
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
